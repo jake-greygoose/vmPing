@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -76,6 +77,41 @@ namespace vmPing.Classes
             }
         }
 
+        public static void SendWebHookAlert(string hostStatus, string hostName, string hostAlias)
+        {
+            var WebHookURL = ApplicationOptions.WebHookURL;
+
+            if (hostAlias != null && hostAlias.Length > 0)
+            {
+                hostAlias = $"({hostAlias}) ";
+            }
+            else
+            {
+                hostAlias = string.Empty;
+            }
+            var message =
+                $"*{hostName} {hostAlias} {hostStatus}* - {DateTime.Now.ToLongDateString()}  {DateTime.Now.ToLongTimeString()}";
+
+            string json = string.Format("{{\"text\": \"{0}\"}}", message);
+
+
+            System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebHookURL);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            {
+                writer.Write(json);
+            }
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Console.WriteLine("Slack response: " + response.StatusCode);
+
+            response.Close();
+
+
+        }
 
         public static void SendTestEmail(
             string serverAddress,
@@ -120,7 +156,28 @@ namespace vmPing.Classes
             }
         }
 
+        public static void SendTestWebHookAlert(
+            string url)
+        {
+            string message = "Hello, Slack!";
+            string json = $"{{\"content\": \"{message}\"}}";
 
+            System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            {
+                writer.Write(json);
+            }
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Console.WriteLine("Slack response: " + response.StatusCode);
+
+            response.Close();
+
+        }
         public static void ShowError(string message)
         {
             MessageBox.Show(message, Strings.Error_WindowTitle, MessageBoxButton.OK, MessageBoxImage.Error);

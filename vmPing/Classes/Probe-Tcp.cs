@@ -106,6 +106,8 @@ namespace vmPing.Classes
                             TriggerStatusChange(new StatusChangeLog { Timestamp = DateTime.Now, Hostname = Hostname, Alias = Alias, Status = ProbeStatus.Up });
                             if (ApplicationOptions.IsEmailAlertEnabled)
                                 Util.SendEmail("up", Hostname, Alias);
+                            if (ApplicationOptions.IsWebHookAlertEnabled)
+                                Util.SendWebHookAlert("up", Hostname, Alias);
                         }
 
                         Statistics.Received++;
@@ -135,6 +137,8 @@ namespace vmPing.Classes
                             TriggerStatusChange(new StatusChangeLog { Timestamp = DateTime.Now, Hostname = Hostname, Alias = Alias, Status = ProbeStatus.Down });
                             if (ApplicationOptions.IsEmailAlertEnabled)
                                 Util.SendEmail("down", Hostname, Alias);
+                            if (ApplicationOptions.IsWebHookAlertEnabled)
+                                Util.SendWebHookAlert("down", Hostname, Alias);
                         }
 
                         // If hostname cannot be resolved, report error and stop.

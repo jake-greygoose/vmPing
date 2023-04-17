@@ -185,6 +185,12 @@ namespace vmPing.Classes
                     new XAttribute("name", "AutoDismissMilliseconds"),
                     ApplicationOptions.AutoDismissMilliseconds),
                 new XElement("option",
+                    new XAttribute("name", "IsWebHookAlertEnabled"),
+                    ApplicationOptions.IsWebHookAlertEnabled),
+                new XElement("option",
+                new XAttribute("name", "WebHookURL"),
+                    ApplicationOptions.WebHookURL ?? string.Empty),
+                new XElement("option",
                     new XAttribute("name", "IsEmailAlertEnabled"),
                     ApplicationOptions.IsEmailAlertEnabled),
                 new XElement("option",
@@ -543,6 +549,14 @@ namespace vmPing.Classes
             if (options.TryGetValue("AutoDismissMilliseconds", out optionValue))
             {
                 ApplicationOptions.AutoDismissMilliseconds = int.Parse(optionValue);
+            }
+            if (options.TryGetValue("IsWebHookAlertEnabled", out optionValue))
+            {
+                ApplicationOptions.IsWebHookAlertEnabled = bool.Parse(optionValue);
+            }
+            if (options.TryGetValue("WebHookURL", out optionValue))
+            {
+                ApplicationOptions.WebHookURL = optionValue;
             }
             if (options.TryGetValue("IsEmailAlertEnabled", out optionValue))
             {

@@ -33,7 +33,7 @@ namespace vmPing.Views
 
             PopulateGeneralOptions();
             PopulateNotificationOptions();
-            PopulateEmailAlertOptions();
+            PopulateAlertOptions();
             PopulateAudioAlertOptions();
             PopulateLogOutputOptions();
             PopulateAdvancedOptions();
@@ -128,8 +128,10 @@ namespace vmPing.Views
             AutoDismissInterval.Text = (ApplicationOptions.AutoDismissMilliseconds / 1000).ToString();
         }
 
-        private void PopulateEmailAlertOptions()
+        private void PopulateAlertOptions()
         {
+            IsWebHookAlertsEnabled.IsChecked = ApplicationOptions.IsWebHookAlertEnabled;
+            WebHookURL.Text = ApplicationOptions.WebHookURL;
             IsEmailAlertsEnabled.IsChecked = ApplicationOptions.IsEmailAlertEnabled;
             IsSmtpAuthenticationRequired.IsChecked = ApplicationOptions.IsEmailAuthenticationRequired;
             IsSmtpSslEnabled.IsChecked = ApplicationOptions.IsEmailSslEnabled;
@@ -215,7 +217,7 @@ namespace vmPing.Views
             if (SaveNotificationOptions() == false)
                 return;
 
-            if (SaveEmailAlertOptions() == false)
+            if (SaveAlertOptions() == false)
                 return;
 
             if (SaveAudioAlertOptions() == false)
@@ -423,8 +425,24 @@ namespace vmPing.Views
             return true;
         }
 
-        private bool SaveEmailAlertOptions()
+        private bool SaveAlertOptions()
         {
+
+            if (IsWebHookAlertsEnabled.IsChecked == true)
+            {
+                if (WebHookURL.Text.Length == 0)
+                {
+                    ShowError("Please enter a valid WebHook URL.", AlertsTab, WebHookURL);
+                    return false;
+                }
+
+                ApplicationOptions.IsWebHookAlertEnabled = true;
+                ApplicationOptions.WebHookURL = WebHookURL.Text;
+            }
+            else
+            {
+                ApplicationOptions.IsWebHookAlertEnabled = false;
+            }
             // Validate input.
             if (IsEmailAlertsEnabled.IsChecked == true)
             {
@@ -432,22 +450,22 @@ namespace vmPing.Views
 
                 if (SmtpServer.Text.Length == 0)
                 {
-                    ShowError("Please enter a valid SMTP server address.", EmailAlertsTab, SmtpServer);
+                    ShowError("Please enter a valid SMTP server address.", AlertsTab, SmtpServer);
                     return false;
                 }
                 else if (SmtpPort.Text.Length == 0 || !regex.IsMatch(SmtpPort.Text))
                 {
-                    ShowError("Please enter a valid port number for your SMTP server.", EmailAlertsTab, SmtpPort);
+                    ShowError("Please enter a valid port number for your SMTP server.", AlertsTab, SmtpPort);
                     return false;
                 }
                 else if (EmailRecipientAddress.Text.Length == 0)
                 {
-                    ShowError("Please enter a valid recipient email address. This address will receive email alerts from vmPing.", EmailAlertsTab, EmailRecipientAddress);
+                    ShowError("Please enter a valid recipient email address. This address will receive email alerts from vmPing.", AlertsTab, EmailRecipientAddress);
                     return false;
                 }
                 else if (EmailFromAddress.Text.Length == 0)
                 {
-                    ShowError("Please enter a valid 'from' address. This address appears as the sender for any alerts that are sent.", EmailAlertsTab, EmailFromAddress);
+                    ShowError("Please enter a valid 'from' address. This address appears as the sender for any alerts that are sent.", AlertsTab, EmailFromAddress);
                     return false;
                 }
                 if (IsSmtpAuthenticationRequired.IsChecked == true)
@@ -455,7 +473,7 @@ namespace vmPing.Views
                     ApplicationOptions.IsEmailAuthenticationRequired = true;
                     if (SmtpUsername.Text.Length == 0)
                     {
-                        ShowError("Please enter a valid username for your mail server.", EmailAlertsTab, SmtpUsername);
+                        ShowError("Please enter a valid username for your mail server.", AlertsTab, SmtpUsername);
                         return false;
                     }
                 }
@@ -475,13 +493,13 @@ namespace vmPing.Views
                 ApplicationOptions.EmailFromAddress = EmailFromAddress.Text;
                 ApplicationOptions.IsEmailSslEnabled = IsSmtpSslEnabled.IsChecked == true ? true : false;
 
-                return true;
             }
             else
             {
                 ApplicationOptions.IsEmailAlertEnabled = false;
-                return true;
             }
+
+            return true;
         }
 
         private bool SaveAudioAlertOptions()
@@ -647,7 +665,11 @@ namespace vmPing.Views
             if (!regex.IsMatch(e.Text))
                 e.Handled = true;
         }
-
+        private void IsWebHookAlertsEnabled_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsWebHookAlertsEnabled.IsChecked == true && WebHookURL.Text.Length == 0)
+                WebHookURL.Focus();
+        }
         private void EmailRecipientAddress_LostFocus(object sender, RoutedEventArgs e)
         {
             if (EmailFromAddress.Text.Length == 0 && EmailRecipientAddress.Text.IndexOf('@') >= 0)
@@ -696,11 +718,33 @@ namespace vmPing.Views
                 catch (Exception ex)
                 {
                     Application.Current.Dispatcher.BeginInvoke(
-                        new Action(() => ShowError(ex.Message, EmailAlertsTab, TestEmailButton)));
+                        new Action(() => ShowError(ex.Message, AlertsTab, TestEmailButton)));
                 }
             });
             TestEmailButton.IsEnabled = true;
             TestEmailButton.Content = "Test";
+        }
+        private async void TestWebHook_Click(object sender, RoutedEventArgs e)
+        {
+            TestWebHookButton.IsEnabled = false;
+            TestWebHookButton.Content = "Testing...";
+
+            var url = WebHookURL.Text;
+
+            await Task.Run(() =>
+            {
+                try
+                {
+                    Util.SendTestWebHookAlert(url);
+                }
+                catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.BeginInvoke(
+                        new Action(() => ShowError(ex.Message, AlertsTab, TestWebHookButton)));
+                }
+            });
+            TestWebHookButton.IsEnabled = true;
+            TestWebHookButton.Content = "Test";
         }
 
         private void BrowseLogPath_Click(object sender, RoutedEventArgs e)

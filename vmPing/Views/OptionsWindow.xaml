@@ -330,14 +330,14 @@
                 </DockPanel>
             </TabItem>
 
-            <!-- Tab: Email Alerts -->
-            <TabItem Header="Email" Name="EmailAlertsTab">
+            <!-- Tab: Email & WebHook Alerts -->
+            <TabItem Header="Alerts" x:Name="AlertsTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <DockPanel Margin="20,0,20,15">
 
                         <!-- Header -->
                         <TextBlock DockPanel.Dock="Top"
-                                   Text="Email Alerts"
+                                   Text="Alerts"
                                    Style="{StaticResource OptionHeaderTextStyle}"/>
 
                         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,15,0,15">
@@ -452,6 +452,55 @@
                                     Visibility="{Binding IsChecked, ElementName=IsEmailAlertsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     DockPanel.Dock="Top"
                                     Click="TestEmail_Click"
+                                    Width="85"
+                                    Margin="0,18,0,0"
+                                    Content="Test"
+                                    HorizontalAlignment="Left"/>
+                        </DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,15,0,15">
+                            <CheckBox DockPanel.Dock="Top"
+                                      Name="IsWebHookAlertsEnabled"
+                                      Content="Enable WebHook alerts"
+                                      Click="IsWebHookAlertsEnabled_Click"
+                                      IsChecked="True"/>
+                            <Label Style="{StaticResource LabelToolTip}">
+                                Enable this option to send a WebHook alert every time a host changes status (down or up).
+                            </Label>
+                        </StackPanel>
+
+                        <DockPanel LastChildFill="False"
+                                   DockPanel.Dock="Top"
+                                   Margin="0"
+                                   Visibility="{Binding IsChecked, ElementName=IsWebHookAlertsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <DockPanel.Resources>
+                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="Margin" Value="0,0,12,0"/>
+                                </Style>
+                                <Style TargetType="{x:Type DockPanel}">
+                                    <Setter Property="Margin" Value="0,3,0,3"/>
+                                    <Setter Property="DockPanel.Dock" Value="Top"/>
+                                </Style>
+                            </DockPanel.Resources>
+
+                            <!-- information subheading -->
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="Information"
+                                       Style="{StaticResource OptionSubHeaderTextStyle}"/>
+
+                            <!-- Webhook URL -->
+                            <DockPanel>
+                                <Grid Width="120">
+                                    <TextBlock Text="WebHook URL"/>
+                                </Grid>
+                                <TextBox Name="WebHookURL"/>
+                            </DockPanel>
+                            <!-- Test button -->
+                            <Button Style="{StaticResource ButtonStandardStyle}"
+                                    Name="TestWebHookButton"
+                                    Visibility="{Binding IsChecked, ElementName=IsWebHookAlertsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    DockPanel.Dock="Top"
+                                    Click="TestWebHook_Click"
                                     Width="85"
                                     Margin="0,18,0,0"
                                     Content="Test"

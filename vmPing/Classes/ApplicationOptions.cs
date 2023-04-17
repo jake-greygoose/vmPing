@@ -25,6 +25,7 @@ namespace vmPing.Classes
         public static int PingInterval { get; set; } = Constants.DefaultInterval;
         public static int PingTimeout { get; set; } = Constants.DefaultTimeout;
         public static int AlertThreshold { get; set; } = 2;
+        public static bool IsWebHookAlertEnabled { get; set; } = false;
         public static bool IsEmailAlertEnabled { get; set; } = false;
         public static bool IsEmailAuthenticationRequired { get; set; } = false;
         public static bool IsEmailSslEnabled { get; set; } = false;
@@ -32,6 +33,7 @@ namespace vmPing.Classes
         public static bool IsAudioDownAlertEnabled { get; set; } = false;
         public static string AudioUpFilePath { get; set; }
         public static string AudioDownFilePath { get; set; }
+        public static string WebHookURL { get; set; }
         public static string EmailServer { get; set; }
         public static string EmailUser { get; set; }
         public static string EmailPassword { get; set; }
